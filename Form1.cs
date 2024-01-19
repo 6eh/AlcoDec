@@ -170,7 +170,7 @@ namespace AlcoDec
 
         private void Turnover()     // Заполнение оборота
         {
-            IEnumerable<XElement> elementFind = xdoc.Element("Файл").Elements("Документ").Elements("ОбъемОборота").Elements("Оборот").Elements("СведПроизвИмпорт").Elements("Движение");
+            IEnumerable<XElement> elementFind = xdoc.Element("Файл").Elements("Документ").Elements("ОбъемОборота").Elements("Оборот").Elements("СведПроизвИмпортер").Elements("Движение");
             foreach (XElement xElem in elementFind)
             {
                 XAttribute attAllDecal = xElem.Attribute("П100000000008");  // Оборот в декалитрах (от организаций оптовой торговли)
@@ -179,10 +179,27 @@ namespace AlcoDec
                     //MessageBox.Show("Производитель!");
                     attAllDecal = xElem.Attribute("П100000000007");
                 }
-                richTextBox2.AppendText(xElem.ToString() + "\n");
-                xElem.Attribute("П100000000014").Value = attAllDecal.Value; // Расход
-                xElem.Attribute("П100000000017").Value = attAllDecal.Value; // Продано
-                xElem.Attribute("П100000000018").Value = "0.00000";         // Остаток
+                //MessageBox.Show(xElem.Attribute("П100000000006").Value);
+
+                // Проверка остатка на начало периода
+                if (xElem.Attribute("П100000000006").Value.Contains("-")) // Если остаток на начало минусовой
+                //if (xElem.Attribute("П100000000006").Value != "0.00000")
+                {
+                    //MessageBox.Show("Остаток не 0.00000\n" + xElem.Attribute("П100000000006").Value);
+                    xElem.Attribute("П100000000006").Value = "0.00000";
+                }
+
+                //richTextBox2.AppendText(xElem.ToString() + "\n");
+
+                // Устарело Движение продукции ( 3.8.5 )
+                //xElem.Attribute("П100000000014").Value = attAllDecal.Value; // Расход
+                //xElem.Attribute("П100000000017").Value = attAllDecal.Value; // Продано
+                //xElem.Attribute("П100000000018").Value = "0.00000";         // Остаток продукции на конец отчетного периода - всего
+
+                // Движение продукции ( 3.9.5 )
+                xElem.Attribute("П100000000015").Value = attAllDecal.Value; // Расход (объем розничной продажи)
+                xElem.Attribute("П100000000019").Value = attAllDecal.Value; // Расход всего
+                xElem.Attribute("П100000000020").Value = "0.00000";         // Остаток
             }
         }
 
